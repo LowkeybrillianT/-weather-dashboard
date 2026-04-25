@@ -18,11 +18,18 @@
 
 ## 📸 Screenshots
 
-> _Add your screenshots here after running the project locally._
+### 🌙 Dark Mode
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/e5016980-f6d5-403f-8175-745ccfb2cca4" width="90%">
+</p>
 
-| Dark Mode | Light Mode |
-|-----------|------------|
-| ![Dark Mode Screenshot](<img width="1600" height="900" alt="Screenshot (153)" src="https://github.com/user-attachments/assets/e5016980-f6d5-403f-8175-745ccfb2cca4" />   ) | ![Light Mode Screenshot](<img width="1600" height="900" alt="Screenshot (154)" src="https://github.com/user-attachments/assets/d02b19b9-9bec-49cf-acb1-64a766c09960" />) |
+<br>
+
+### ☀️ Light Mode
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/d02b19b9-9bec-49cf-acb1-64a766c09960" width="90%">
+</p>
+
 
 ---
 
