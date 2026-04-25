@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌦️ Weather Dashboard – Bangalore</title>
+  <meta name="description" content="Real-time Weather Analysis Dashboard for Bangalore with AI insights, forecasts, and data visualizations." />
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌦️</text></svg>" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+
+  <!-- Chart.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ═══ Dynamic Background ═══════════════════════════════════════ -->
+<div id="bg-layer"></div>
+<div id="particles"></div>
+
+<!-- ═══ Loading Overlay ══════════════════════════════════════════ -->
+<div id="loading-overlay">
+  <div class="spinner-ring">
+    <span class="spinner-icon">🌦️</span>
+  </div>
+  <p class="loading-text">Fetching weather data…</p>
+</div>
+
+<!-- ═══ Error Toast ═══════════════════════════════════════════════ -->
+<div id="error-toast">
+  <span class="toast-icon">⚠️</span>
+  <span id="error-msg">Something went wrong.</span>
+  <span class="toast-close" onclick="hideError()">✕</span>
+</div>
+
+<!-- ═══ App Wrapper ═══════════════════════════════════════════════ -->
+<div class="app-wrapper">
+
+  <!-- ─── Header ──────────────────────────────────────────────── -->
+  <header class="app-header">
+    <div class="logo-area">
+      <div class="logo-icon">🌦️</div>
+      <div class="logo-text">
+        <h1>Weather Dashboard</h1>
+        <span>Bangalore Edition · Real-time Insights</span>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <!-- Search -->
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          id="city-input"
+          placeholder="Search city…"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button class="search-btn" onclick="handleSearch()">Go</button>
+      </div>
+
+      <!-- Geolocation -->
+      <button class="icon-btn" id="geo-btn" title="Use my location" onclick="useGeolocation()">📍</button>
+
+      <!-- Dark Mode Toggle -->
+      <button class="icon-btn" id="theme-btn" title="Toggle theme" onclick="toggleTheme()">🌙</button>
+    </div>
+  </header>
+
+  <!-- ─── Current Weather + AI Insights ──────────────────────── -->
+  <section class="current-weather-section">
+
+    <!-- Main Weather Hero -->
+    <div class="weather-hero-card">
+      <div class="location-row">
+        <span class="location-pin">📍</span>
+        <span class="city-name" id="display-city">Bangalore</span>
+        <span class="country-code" id="display-country">IN</span>
+      </div>
+      <div class="date-time-row" id="date-time-display">Loading…</div>
+
+      <div class="temp-display">
+        <div class="weather-icon-large" id="main-weather-icon">⛅</div>
+        <div>
+          <div class="temp-main">
+            <span class="temp-value" id="main-temp">--</span>
+            <span class="temp-unit">°C</span>
+          </div>
+          <div class="weather-condition" id="main-condition">Loading…</div>
+          <div class="feels-like" id="feels-like-text">Feels like --°C</div>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="weather-stats-grid">
+        <div class="stat-item">
+          <div class="stat-icon">💧</div>
+          <div class="stat-label">Humidity</div>
+          <div class="stat-value" id="stat-humidity">--%</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">🌬️</div>
+          <div class="stat-label">Wind</div>
+          <div class="stat-value" id="stat-wind">-- km/h</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">👁️</div>
+          <div class="stat-label">Visibility</div>
+          <div class="stat-value" id="stat-visibility">-- km</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">🧭</div>
+          <div class="stat-label">Pressure</div>
+          <div class="stat-value" id="stat-pressure">-- hPa</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Insights Panel -->
+    <div class="insights-card">
+      <div class="card-label">AI Insights Engine</div>
+      <div class="card-title">Smart Recommendations</div>
+      <div class="insight-list" id="insights-list">
+        <!-- Populated by JS -->
+        <div class="insight-item">
+          <span class="insight-emoji">⌛</span>
+          <div class="insight-content">
+            <div class="insight-title">Analyzing conditions…</div>
+            <div class="insight-desc">Please wait while we fetch and process your weather data.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ─── Metrics Strip ────────────────────────────────────────── -->
+  <section class="metrics-strip">
+    <div class="metric-card">
+      <div class="metric-icon">🌡️</div>
+      <div class="metric-label">Max Temp</div>
+      <div class="metric-value">
+        <span id="metric-max-temp">--</span><span class="metric-unit">°C</span>
+      </div>
+      <div class="metric-sub" id="metric-max-sub">Today's high</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">❄️</div>
+      <div class="metric-label">Min Temp</div>
+      <div class="metric-value">
+        <span id="metric-min-temp">--</span><span class="metric-unit">°C</span>
+      </div>
+      <div class="metric-sub" id="metric-min-sub">Today's low</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">🌧️</div>
+      <div class="metric-label">Rain Chance</div>
+      <div class="metric-value">
+        <span id="metric-rain">--</span><span class="metric-unit">%</span>
+      </div>
+      <div class="metric-sub">Next 3 hours</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">☁️</div>
+      <div class="metric-label">Cloud Cover</div>
+      <div class="metric-value">
+        <span id="metric-clouds">--</span><span class="metric-unit">%</span>
+      </div>
+      <div class="metric-sub" id="metric-clouds-sub">Sky cover</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">💦</div>
+      <div class="metric-label">Dew Point</div>
+      <div class="metric-value">
+        <span id="metric-dew">--</span><span class="metric-unit">°C</span>
+      </div>
+      <div class="metric-sub">Moisture comfort</div>
+    </div>
+  </section>
+
+  <!-- ─── Charts Row ───────────────────────────────────────────── -->
+  <section class="charts-section">
+
+    <!-- Temperature Trend Chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="card-label">Forecast Trend</div>
+          <div class="card-title">Temperature Over 5 Days</div>
+        </div>
+        <div class="chart-legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#38d0f5;"></div>
+            Max Temp
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#7eb4ff;"></div>
+            Min Temp
+          </div>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="temp-chart"></canvas>
+      </div>
+    </div>
+
+    <!-- Humidity Chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="card-label">Humidity Analysis</div>
+          <div class="card-title">Moisture Levels</div>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="humidity-chart"></canvas>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ─── 5-Day Forecast ───────────────────────────────────────── -->
+  <section class="forecast-section">
+    <div class="section-header">
+      <div>
+        <div class="section-title">5-Day Forecast</div>
+        <div class="section-sub">Daily overview with precipitation probability</div>
+      </div>
+    </div>
+    <div class="forecast-grid" id="forecast-grid">
+      <!-- Populated by JS -->
+    </div>
+  </section>
+
+  <!-- ─── Bottom Section ──────────────────────────────────────────── -->
+  <section class="bottom-section">
+
+    <!-- Rain Probability Chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="card-label">Precipitation</div>
+          <div class="card-title">Rain Probability (Next 24h)</div>
+        </div>
+        <div class="chart-legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#6fb8ff;"></div>
+            Rain %
+          </div>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="rain-chart"></canvas>
+      </div>
+    </div>
+
+    <!-- Sunrise / Sunset + Extra Metrics -->
+    <div class="extra-card">
+      <div class="card-label">Sun Schedule</div>
+      <div class="card-title" style="margin-bottom:20px">Sunrise & Sunset</div>
+
+      <div class="sun-card">
+        <div class="sun-item">
+          <div class="sun-circle rise">🌅</div>
+          <div>
+            <div class="sun-label">Sunrise</div>
+            <div class="sun-time" id="sunrise-time">--:--</div>
+          </div>
+        </div>
+        <div class="sun-item">
+          <div class="sun-circle set">🌇</div>
+          <div>
+            <div class="sun-label">Sunset</div>
+            <div class="sun-time" id="sunset-time">--:--</div>
+          </div>
+        </div>
+
+        <div class="sun-progress">
+          <div class="sun-progress-label">
+            <span id="sun-pct-label">Day Progress</span>
+            <span id="sun-pct-val">--%</span>
+          </div>
+          <div class="sun-progress-bar">
+            <div class="sun-progress-fill" id="sun-progress-fill" style="width:0%">
+              <div class="sun-dot"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Extra gauges -->
+        <div class="gauge-grid" style="margin-top: 8px;">
+          <div class="gauge-item">
+            <div class="gauge-icon">☀️</div>
+            <div class="gauge-label">UV Index</div>
+            <div class="gauge-value" id="uv-index">--</div>
+            <div class="gauge-desc" id="uv-desc">Loading</div>
+            <div class="gauge-bar">
+              <div class="gauge-bar-fill" id="uv-bar" style="width:0%; background: linear-gradient(90deg, #7ae0b0, #f9d14a, #ff7a4a)"></div>
+            </div>
+          </div>
+          <div class="gauge-item">
+            <div class="gauge-icon">🌊</div>
+            <div class="gauge-label">Sea Level</div>
+            <div class="gauge-value" id="sea-level">--</div>
+            <div class="gauge-desc">hPa pressure</div>
+            <div class="gauge-bar">
+              <div class="gauge-bar-fill" id="sea-bar" style="width:0%; background: linear-gradient(90deg, #6fb8ff, #38d0f5)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ─── Last Updated ─────────────────────────────────────────── -->
+  <div class="last-updated" id="last-updated">
+    Last updated: —
+  </div>
+
+</div><!-- end .app-wrapper -->
+
+<script src="script.js"></script>
+</body>
+</html>
