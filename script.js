@@ -13,7 +13,7 @@
 
 /* ─── Configuration ─────────────────────────────────────────────── */
 const CONFIG = {
-  API_KEY: 'YOUR_API_KEY_HERE',            // ← Replace with your key
+  API_KEY: c974b56bf0fad04eec0543a874b4bc59,            // ← Replace with your key
   BASE_URL: 'https://api.openweathermap.org/data/2.5',
   DEFAULT_CITY: 'Bangalore',
   UNITS: 'metric',
